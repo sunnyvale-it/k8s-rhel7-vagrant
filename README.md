@@ -27,7 +27,7 @@ vagrant$ export KUBECONFIG=$(pwd)/kubeconfig.yaml
 vagrant$ kubectl get nodes
 
 NAME     STATUS   ROLES    AGE   VERSION
-master   Ready    master   18h   v1.15.3
-node1    Ready    <none>   17h   v1.15.3
-node2    Ready    <none>   17h   v1.15.3
+master   Ready    master   18h   v1.20
+node1    Ready    <none>   17h   v1.20
+node2    Ready    <none>   17h   v1.20
 ```
