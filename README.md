@@ -2,7 +2,7 @@
 
 Virtualbox + Vagrant + kubectl have to be installed on the host machine as a prerequisite.
 
-K8S nodes will be provisioned with RedHat Enterprise Linux and the installation procedure relys on this kind of OS.
+K8S nodes will be provisioned with RedHat Enterprise Linux and the installation procedure relays on this kind of OS.
 
 All the istructions here after have to be run on the host machine.
 
