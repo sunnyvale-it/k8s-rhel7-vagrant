@@ -25,17 +25,43 @@ MINIONSCRIPT
 
 $kubemasterscript = <<SCRIPT
 
-# Disable swap permanently
-sudo sed -i '/ swap / s/^/#/' /etc/fstab
+sudo swapoff -a
+
+sudo sed -i '/.*\tswap.*/ s/^/#/' /etc/fstab
 
 sudo setenforce 0
+
 sudo sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
 
-sudo systemctl disable firewalld 
-sudo systemctl stop firewalld
+# Enable IP Forwarding
+echo '1' | sudo tee /proc/sys/net/bridge/bridge-nf-call-iptables 
+cat <<EOF | sudo tee  /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
 
 sudo modprobe br_netfilter
-echo '1' | sudo tee /proc/sys/net/bridge/bridge-nf-call-iptables 
+
+sudo firewall-cmd --permanent --add-port=6443/tcp
+sudo firewall-cmd --permanent --add-port=2379-2380/tcp
+sudo firewall-cmd --permanent --add-port=10250/tcp
+sudo firewall-cmd --permanent --add-port=10251/tcp
+sudo firewall-cmd --permanent --add-port=10252/tcp
+sudo firewall-cmd --permanent --add-port=10255/tcp
+sudo firewall-cmd --permanent --add-port=8472/udp
+sudo firewall-cmd --add-masquerade --permanent
+# only if you want NodePorts exposed on control plane IP as well
+sudo firewall-cmd --permanent --add-port=30000-32767/tcp
+
+
+sudo firewall-cmd --permanent --add-port=10250/tcp
+sudo firewall-cmd --permanent --add-port=10255/tcp
+sudo firewall-cmd --permanent --add-port=8472/udp
+sudo firewall-cmd --permanent --add-port=30000-32767/tcp
+sudo firewall-cmd --add-masquerade --permanent
+
+sudo systemctl restart firewalld
+sudo systemctl enable firewalld
 
 sudo kubeadm reset -f
 sudo kubeadm init --kubernetes-version 1.20.0 --apiserver-advertise-address=#{MASTER_IP} --pod-network-cidr=#{POD_NW_CIDR} --token #{KUBETOKEN} --token-ttl 0
